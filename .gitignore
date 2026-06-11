@@ -1,0 +1,40 @@
+# Contexto de trabajo (no se versiona)
+CLAUDE.md
+
+# Secretos / entorno
+.env
+.env.local
+.env.*.local
+
+# Vector store persistente (se regenera con la ingesta)
+chroma_db/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# Entornos virtuales
+.venv/
+venv/
+env/
+
+# uv
+.uv/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Caches y herramientas
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Sistema operativo / editor
+.DS_Store
+.vscode/
+.idea/
