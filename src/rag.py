@@ -8,7 +8,7 @@ from src.config import CHROMA_DIR, DOMAIN_DIRS, get_settings
 
 
 def load_documents(folder: Path) -> list:
-    """Carga los documentos .md/.txt/.csv de una carpeta como Document de LangChain."""
+    """Carga los .md/.txt/.csv de una carpeta como Document de LangChain."""
     from langchain_core.documents import Document
 
     docs = []
@@ -27,7 +27,7 @@ def load_documents(folder: Path) -> list:
 
 
 def split_documents(documents: list) -> list:
-    """Parte los documentos en chunks respetando títulos markdown y párrafos."""
+    """Parte los documentos en chunks (markdown-aware)."""
     from langchain_text_splitters import RecursiveCharacterTextSplitter
 
     settings = get_settings()
@@ -40,12 +40,12 @@ def split_documents(documents: list) -> list:
 
 
 def count_chunks(domain: str) -> int:
-    """Cuenta cuántos chunks genera un dominio (sirve para validar offline, sin API key)."""
+    """Cuenta los chunks de un dominio (validación offline, sin API key)."""
     return len(split_documents(load_documents(DOMAIN_DIRS[domain])))
 
 
 def build_embeddings():
-    """Crea el modelo de embeddings de OpenAI. Requiere OPENAI_API_KEY real."""
+    """Crea el modelo de embeddings de OpenAI (requiere OPENAI_API_KEY)."""
     settings = get_settings()
     if not settings.has_openai:
         raise RuntimeError("Falta OPENAI_API_KEY para crear embeddings reales.")
@@ -60,25 +60,19 @@ def build_embeddings():
 
 @lru_cache(maxsize=3)
 def get_retriever(domain: str):
-    """Crea o carga la colección Chroma de un dominio y la devuelve como retriever.
-
-    Si la colección ya existe en disco, la reusa (no recalcula embeddings).
-    Si no, la construye desde los documentos y la persiste.
-    """
+    """Crea o reusa la colección Chroma de un dominio y la devuelve como retriever."""
     from langchain_chroma import Chroma
 
     settings = get_settings()
     folder = DOMAIN_DIRS[domain]
     embeddings = build_embeddings()
-    collection_name = f"{domain}_docs"
 
     vectorstore = Chroma(
-        collection_name=collection_name,
+        collection_name=f"{domain}_docs",
         embedding_function=embeddings,
         persist_directory=str(CHROMA_DIR),
     )
 
-    # Si la colección está vacía, la poblamos (primera vez).
     if vectorstore._collection.count() == 0:
         chunks = split_documents(load_documents(folder))
         if len(chunks) < 50:
@@ -89,7 +83,7 @@ def get_retriever(domain: str):
 
 
 def retrieve_context(domain: str, query: str) -> tuple[str, list[dict[str, Any]]]:
-    """Recupera los chunks más relevantes y devuelve (contexto_para_LLM, fuentes)."""
+    """Recupera los chunks relevantes y devuelve (contexto, fuentes)."""
     retriever = get_retriever(domain)
     docs = retriever.invoke(query)
 
