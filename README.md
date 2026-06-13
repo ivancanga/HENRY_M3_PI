@@ -137,51 +137,58 @@ uv run python -m src.main
 > La primera consulta construye las colecciones Chroma (hace embeddings de los
 > documentos) y las persiste en `chroma_db/`. Las siguientes corridas las reusan.
 
-### Ejemplos de uso
+## Ejemplos de uso
 
-Tres consultas reales, cada una clasificada y enrutada al agente especialista correcto:
+Cuatro consultas reales que muestran el ruteo, la respuesta fundamentada y la evaluación automática:
 
 ---
 
-#### 🔧 IT / Soporte Técnico
+**IT / Soporte Técnico**
 
-**❓ Pregunta:** *Necesito cambiar mi contraseña del correo corporativo*
-**🎯 Intent:** `tech`
-
-**💬 Respuesta:**
+❓ Pregunta: *Necesito cambiar mi contraseña del correo corporativo*
+🧭 Ruteo: orchestrator → `tech`
+💬 Respuesta:
 > Para cambiar la contraseña de tu correo corporativo:
 > 1. Ingresá al portal de identidad corporativa con tu usuario y contraseña actual.
-> 2. Entrá a **Seguridad → Cambiar contraseña**.
+> 2. Entrá a Seguridad → Cambiar contraseña.
 > 3. Escribí la contraseña actual y la nueva (mínimo 12 caracteres: letras, números y símbolos).
 > 4. Confirmá con el segundo factor (MFA) y guardá los cambios.
->
-> El cambio aplica de inmediato a todos los sistemas conectados por SSO, incluido el correo.
 
-**📄 Fuentes:** `seguridad_contrasenas.md` · **⭐ Calidad:** `overall 10` (relevance 10 · completeness 10 · accuracy 10 · clarity 10)
-
----
-
-#### 👥 Recursos Humanos
-
-**❓ Pregunta:** *¿Cuántos días de vacaciones tengo con 6 años de antigüedad?*
-**🎯 Intent:** `hr`
-
-**💬 Respuesta:**
-> Tenés 28 días hábiles de vacaciones por año con 6 años de antigüedad.
-
-**📄 Fuentes:** `politica_vacaciones_pto.md` · **⭐ Calidad:** `overall 10` (relevance 10 · completeness 10 · accuracy 10 · clarity 10)
+📄 Fuentes: `seguridad_contrasenas.md`
+⭐ Evaluación: overall 10 (relevance 10 · completeness 10 · accuracy 10 · clarity 10)
 
 ---
 
-#### 💰 Finanzas
+**Recursos Humanos**
 
-**❓ Pregunta:** *¿Cuándo se acredita un reembolso de gastos aprobado?*
-**🎯 Intent:** `finance`
+❓ Pregunta: *¿Puedo trabajar desde otro país y por cuánto tiempo?*
+🧭 Ruteo: orchestrator → `hr`
+💬 Respuesta:
+> Podés trabajar temporalmente desde otro país por un máximo de 30 días corridos por año sin trámites adicionales. Para estadías mayores, se requiere aprobación de People Operations y del área Legal.
 
-**💬 Respuesta:**
+📄 Fuentes: `trabajo_remoto_hibrido.md`
+⭐ Evaluación: overall 9 (relevance 10 · completeness 8 · accuracy 10 · clarity 9) — respuesta correcta, pero el evaluator la marca como algo incompleta.
+
+---
+
+**Finanzas**
+
+❓ Pregunta: *¿Cuándo se acredita un reembolso de gastos aprobado?*
+🧭 Ruteo: orchestrator → `finance`
+💬 Respuesta:
 > El reembolso se acredita junto con el salario: si se aprueba antes del día 20 del mes, en ese mes; si no, en el siguiente.
 
-**📄 Fuentes:** `reembolsos.md`, `reportes_gastos.md` · **⭐ Calidad:** `overall 10` (relevance 10 · completeness 10 · accuracy 10 · clarity 10)
+📄 Fuentes: `reembolsos.md`, `reportes_gastos.md`
+⭐ Evaluación: overall 10 (relevance 10 · completeness 10 · accuracy 10 · clarity 10)
+
+---
+
+**Fuera de dominio (unknown)**
+
+❓ Pregunta: *¿Cuál es la capital de Francia?*
+🧭 Ruteo: orchestrator → `unknown` (corta a END, sin RAG ni evaluación)
+💬 Respuesta:
+> No tengo documentación interna suficiente para responder esa consulta. Puedo ayudarte con RR. HH., soporte técnico (IT) o finanzas.
 
 ---
 
