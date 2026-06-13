@@ -21,6 +21,27 @@ fuertemente usar el gestor en lugar de anotar contraseñas o reutilizarlas.
 El gestor también permite compartir credenciales de equipo de forma segura cuando es
 estrictamente necesario, sin exponer la contraseña en texto plano.
 
+## Cómo cambiar tu contraseña
+
+Para cambiar la contraseña de tu cuenta corporativa (incluido el correo), seguí
+estos pasos:
+
+1. Ingresá al portal de identidad corporativa (identidad.empresa.internal) con tu
+   usuario y contraseña actual.
+2. Entrá a la sección "Seguridad" y elegí la opción "Cambiar contraseña".
+3. Escribí tu contraseña actual y luego la nueva (mínimo 12 caracteres, combinando
+   letras, números y símbolos).
+4. Confirmá tu identidad con el segundo factor (MFA) y guardá los cambios.
+
+Como las cuentas usan Single Sign-On (SSO), el cambio aplica de inmediato a todos
+los sistemas conectados, incluido el correo corporativo. No hace falta cambiarla en
+cada aplicación por separado.
+
+Si olvidaste tu contraseña actual y no podés ingresar, usá la opción "¿Olvidaste tu
+contraseña?" del portal de autoservicio, que verifica tu identidad con el segundo
+factor y te permite establecer una nueva. Si tampoco tenés acceso al segundo factor,
+abrí un ticket con IT Support para una reverificación de identidad.
+
 ## Phishing e ingeniería social
 
 El phishing es una de las principales amenazas de seguridad. Consiste en correos o
