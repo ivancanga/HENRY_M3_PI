@@ -61,3 +61,14 @@ def score_current_trace(scores: dict[str, float], comment: str) -> None:
             client.score_current_trace(name=name, value=value, comment=comment)
     except Exception:
         return
+
+
+def flush() -> None:
+    """Fuerza el envío de trazas/scores pendientes a Langfuse (best-effort)."""
+    client = _get_client()
+    if client is None:
+        return
+    try:
+        client.flush()
+    except Exception:
+        return
