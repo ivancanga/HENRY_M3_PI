@@ -68,13 +68,6 @@ def orchestrator_node(state: AgentState) -> dict:
 def answer_with_rag(domain: str, state: AgentState) -> dict:
     """Lógica RAG común a los agentes: retrieval + respuesta del LLM grounded."""
     settings = get_settings()
-    if not settings.has_openai:
-        return {
-            "context": "",
-            "sources": [],
-            "answer": "Falta OPENAI_API_KEY para ejecutar RAG real (retrieval + LLM).",
-        }
-
     context, sources = retrieve_context(domain, state["query"])
 
     from langchain_core.prompts import ChatPromptTemplate

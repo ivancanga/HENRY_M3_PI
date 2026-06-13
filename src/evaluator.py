@@ -22,15 +22,6 @@ class Evaluation(BaseModel):
 def evaluate(state: dict[str, Any]) -> Evaluation:
     """Evalúa la respuesta con un LLM-as-judge (escala 1-10)."""
     settings = get_settings()
-    if not settings.has_openai:
-        return Evaluation(
-            relevance=6,
-            completeness=5,
-            accuracy=6,
-            clarity=7,
-            overall=6.0,
-            feedback="Evaluación local simple: configurar OPENAI_API_KEY para score real.",
-        )
 
     from langchain_core.prompts import ChatPromptTemplate
     from langchain_openai import ChatOpenAI
