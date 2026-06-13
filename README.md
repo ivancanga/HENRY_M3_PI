@@ -225,19 +225,28 @@ Cuatro consultas reales que muestran el ruteo, la respuesta fundamentada y la ev
 
 ## Notas de configuración
 
-- Parámetros de RAG (`chunk_size`, `chunk_overlap`, `retriever_k`) y modelos se
-  ajustan en un único lugar: `src/config.py`.
-- Para reconstruir las colecciones desde cero, borrá la carpeta `chroma_db/`.
-- Langfuse 4.x: las credenciales se configuran vía el cliente `Langfuse(...)`; el
-  `CallbackHandler` ya no recibe `secret_key`/`host` (los toma del entorno).
+- **Todo configurable en un lugar.** `chunk_size`, `chunk_overlap` y `retriever_k`
+  se ajustan en `src/config.py`; los modelos, vía `.env` (`OPENAI_MODEL`,
+  `OPENAI_EMBEDDING_MODEL`) sin tocar código.
+- **Re-indexar después de cambios.** Las colecciones Chroma se construyen una sola
+  vez y se reusan. Si modificás los documentos de `data/` o los parámetros de
+  chunking, borrá `chroma_db/`; si no, el sistema sigue usando las colecciones
+  viejas.
+- **Región de Langfuse.** `LANGFUSE_HOST` debe coincidir con la región de tu
+  proyecto: `https://cloud.langfuse.com` (UE) o `https://us.cloud.langfuse.com`
+  (US). Si no coincide, la autenticación falla.
 
 ## Limitaciones conocidas
 
-- El sistema responde en 3 dominios (HR, Tech, Finance); cualquier otra consulta
-  cae en `unknown`.
-- Las respuestas dependen de la calidad y cobertura de los documentos en `data/`;
-  si la información no está, el agente responde que no la tiene.
-- El evaluador es un LLM-as-judge: es una guía de calidad, no un juicio infalible.
-- Requiere conexión a internet y una API key de OpenAI con saldo para funcionar
-  con RAG real.
-```
+- **Tres dominios.** Solo responde sobre RR. HH., IT y Finanzas; el resto cae en
+  `unknown`. Sumar un dominio implica agregar sus documentos y un nodo al grafo.
+- **Calidad atada a los documentos.** El sistema es tan bueno como su base de
+  conocimiento: si la información no está en `data/`, el agente lo dice en vez de
+  inventar (como pasó con el procedimiento de cambio de contraseña).
+- **Sin memoria conversacional.** Cada consulta es independiente; no recuerda
+  preguntas anteriores ni mantiene un diálogo de varios turnos.
+- **Ruteo y retrieval no son perfectos.** Consultas en el límite entre dominios
+  pueden caer en `unknown`, y el retrieval (top-4 por similitud) puede dejar afuera
+  un chunk relevante si no quedó entre los más cercanos.
+- **Evaluador orientativo.** El LLM-as-judge es una guía de calidad, no un juicio
+  infalible; tiende a ser generoso con respuestas bien fundamentadas.
