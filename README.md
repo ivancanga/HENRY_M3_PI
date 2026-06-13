@@ -1,5 +1,39 @@
 # Sistema Multi-Agente RAG con LangGraph
 
+```mermaid
+flowchart LR
+    START([START]) --> ORCH[orchestrator]
+
+    ORCH -->|hr| HR[hr]
+    ORCH -->|tech| TECH[tech]
+    ORCH -->|finance| FIN[finance]
+    ORCH -->|unknown| UNK[unknown]
+
+    HR --> EVAL[evaluator]
+    TECH --> EVAL
+    FIN --> EVAL
+
+    EVAL --> FIN_END([END])
+    UNK --> UNK_END([END])
+
+    UNK -.->|sin RAG ni evaluación| UNK_END
+
+    LF[(Langfuse<br/>tracing)]
+    ORCH -. traza .-> LF
+
+    classDef start fill:#22c55e,stroke:#15803d,color:#fff;
+    classDef node fill:#3b82f6,stroke:#1e40af,color:#fff;
+    classDef eval fill:#a855f7,stroke:#7e22ce,color:#fff;
+    classDef ending fill:#64748b,stroke:#334155,color:#fff;
+    classDef obs fill:#ec4899,stroke:#be185d,color:#fff;
+
+    class START start;
+    class ORCH,HR,TECH,FIN,UNK node;
+    class EVAL eval;
+    class FIN_END,UNK_END ending;
+    class LF obs;
+```
+
 Sistema de routing inteligente para una empresa SaaS que clasifica
 automáticamente las consultas entrantes por departamento (RR. HH., Soporte
 Técnico, Finanzas) y las deriva a agentes RAG especializados. Un agente
@@ -19,11 +53,6 @@ Usuario pregunta
   → el LLM responde usando solo esos documentos (grounded)
   → evaluator puntúa la respuesta (LLM-as-judge)
   → Langfuse traza todo el flujo y registra los scores
-```
-
-```
-START → orchestrator → [hr | tech | finance] → evaluator → END
-                     → unknown → END   (sin RAG ni evaluación)
 ```
 
 ## Estructura del proyecto
