@@ -78,8 +78,9 @@ def answer_with_rag(domain: str, state: AgentState) -> dict:
             (
                 "system",
                 f"Sos un agente especialista de {domain} de una empresa SaaS. "
-                "Respondé en español usando únicamente el contexto provisto. "
-                "Si el contexto no alcanza, decí que no tenés información suficiente; no inventes.",
+                "Respondé en español usando EXCLUSIVAMENTE la información del contexto provisto. "
+                "Si la información no está en el contexto, respondé estrictamente que no contás "
+                "con esa información; no uses conocimiento externo ni inventes datos.",
             ),
             ("human", "Contexto:\n{context}\n\nConsulta:\n{query}\n\nRespuesta:"),
         ]
