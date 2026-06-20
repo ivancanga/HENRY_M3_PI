@@ -88,11 +88,12 @@ flowchart LR
 HENRY_M3_PI/
 ├── data/                       # Bases de conocimiento (3 dominios, .md)
 │   ├── hr_docs/                # ~86 chunks
-│   ├── tech_docs/              # ~89 chunks
+│   ├── tech_docs/              # ~91 chunks
 │   └── finance_docs/           # ~90 chunks
 ├── src/
 │   ├── config.py               # configuración central (claves, rutas, parámetros)
-│   ├── rag.py                  # RAG: load → chunk → embeddings → Chroma → retriever
+│   ├── rag.py                  # RAG: load → chunk → embeddings → retriever
+│   ├── vectorstore.py          # abstracción del vector store (Chroma)
 │   ├── agents.py               # router (orquestador) + nodos especialistas
 │   ├── evaluator.py            # nodo evaluator (LLM-as-judge)
 │   ├── langfuse_setup.py       # observability (callback + scores)
