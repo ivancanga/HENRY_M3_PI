@@ -192,6 +192,27 @@ Cuatro consultas reales que muestran el ruteo, la respuesta fundamentada y la ev
 
 ---
 
+## Evaluación y observabilidad
+
+Dos capas integradas en el flujo (no son pasos opcionales):
+
+- **Evaluación automática del RAG (LLM-as-judge).** Cada respuesta es puntuada por
+  un segundo modelo en tres métricas alineadas con estándares de RAG
+  (Ragas/TruLens): `faithfulness` (fidelidad al contexto), `answer_relevance`
+  (relevancia de la respuesta) y `context_relevance` (calidad del retrieval). Los
+  scores aparecen en cada ejemplo de arriba y sirven para detectar respuestas de
+  baja calidad antes de que lleguen al cliente.
+- **Observabilidad con Langfuse.** Todo el recorrido de cada consulta queda trazado
+  (orchestrator → retrieval → respuesta → evaluación). En el dashboard se inspecciona
+  el execution path completo —clasificación, chunks recuperados, prompts, latencia y
+  tokens— y los scores del evaluator quedan asociados a cada traza como *Scores*
+  nativos. Permite depurar una misclassification o un retrieval fallido sin adivinar.
+
+> Ambas se activan solas: la evaluación corre en cada consulta; el tracing se
+> habilita al cargar las claves de Langfuse en `.env`.
+
+---
+
 ## Decisiones técnicas
 
 - **Orquestación con enrutamiento condicional.** Separo *decidir a qué
