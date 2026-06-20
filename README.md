@@ -155,19 +155,19 @@ Cuatro consultas reales que muestran el ruteo, la respuesta fundamentada y la ev
 > 4. Confirmá con el segundo factor (MFA) y guardá los cambios.
 
 📄 Fuentes: `seguridad_contrasenas.md`
-⭐ Evaluación: overall 10 (faithfulness 10 · answer_relevance 10 · context_relevance 10)
+⭐ Evaluación: overall 10 (relevance 10 · completeness 10 · accuracy 10 · clarity 10)
 
 ---
 
 **Recursos Humanos**
 
-❓ Pregunta: *¿Qué beneficios tengo si trabajo de forma remota?*
+❓ Pregunta: *¿Puedo trabajar desde otro país y por cuánto tiempo?*
 🧭 Ruteo: orchestrator → `hr`
 💬 Respuesta:
-> Trabajando de forma remota tenés: un estipendio único de 800 USD para equipar tu espacio de trabajo, una notebook corporativa, 40 USD mensuales para internet, hasta 120 USD de reintegro por coworking, y la opción de modalidad remota total. Igual debés cumplir las responsabilidades de seguridad de la información.
+> Podés trabajar temporalmente desde otro país por un máximo de 30 días corridos por año sin trámites adicionales. Para estadías mayores, se requiere aprobación de People Operations y del área Legal.
 
 📄 Fuentes: `trabajo_remoto_hibrido.md`
-⭐ Evaluación: overall 9 (faithfulness 9 · answer_relevance 10 · context_relevance 10) — el evaluator baja faithfulness por un matiz no explícito en el contexto.
+⭐ Evaluación: overall 9 (relevance 10 · completeness 8 · accuracy 10 · clarity 9) — respuesta correcta, pero el evaluator la marca como algo incompleta.
 
 ---
 
@@ -179,7 +179,7 @@ Cuatro consultas reales que muestran el ruteo, la respuesta fundamentada y la ev
 > El reembolso se acredita junto con el salario: si se aprueba antes del día 20 del mes, en ese mes; si no, en el siguiente.
 
 📄 Fuentes: `reembolsos.md`, `reportes_gastos.md`
-⭐ Evaluación: overall 10 (faithfulness 10 · answer_relevance 10 · context_relevance 10)
+⭐ Evaluación: overall 10 (relevance 10 · completeness 10 · accuracy 10 · clarity 10)
 
 ---
 
@@ -197,11 +197,9 @@ Cuatro consultas reales que muestran el ruteo, la respuesta fundamentada y la ev
 Dos capas integradas en el flujo (no son pasos opcionales):
 
 - **Evaluación automática del RAG (LLM-as-judge).** Cada respuesta es puntuada por
-  un segundo modelo en tres métricas alineadas con estándares de RAG
-  (Ragas/TruLens): `faithfulness` (fidelidad al contexto), `answer_relevance`
-  (relevancia de la respuesta) y `context_relevance` (calidad del retrieval). Los
-  scores aparecen en cada ejemplo de arriba y sirven para detectar respuestas de
-  baja calidad antes de que lleguen al cliente.
+  un segundo modelo en varias dimensiones (`relevance`, `completeness`, `accuracy`,
+  `clarity` y un `overall`). Los scores aparecen en cada ejemplo de arriba y sirven
+  para detectar respuestas de baja calidad antes de que lleguen al cliente.
 - **Observabilidad con Langfuse.** Todo el recorrido de cada consulta queda trazado
   (orchestrator → retrieval → respuesta → evaluación). En el dashboard se inspecciona
   el execution path completo —clasificación, chunks recuperados, prompts, latencia y
@@ -238,9 +236,8 @@ Dos capas integradas en el flujo (no son pasos opcionales):
   porque persiste en disco y maneja una colección por dominio sin código extra; a
   esta escala el rendimiento es equivalente, así que prioricé la simplicidad.
 - **Control de calidad automático (LLM-as-judge).** Un segundo modelo evalúa cada
-  respuesta en métricas alineadas con estándares de RAG —**faithfulness**,
-  **answer relevance** y **context relevance** (las claves de Ragas/TruLens)— antes
-  de que llegue al cliente. Convierte la calidad en algo medible, no en una impresión.
+  respuesta antes de que llegue al cliente y detecta cuándo el agente se desvía
+  del contexto. Convierte la calidad en algo medible, no en una impresión.
 - **Observabilidad de extremo a extremo.** Todo el recorrido de cada consulta
   queda trazado en Langfuse, lo que permite depurar una mala clasificación o un
   retrieval fallido inspeccionando el flujo completo, en lugar de adivinar.

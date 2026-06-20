@@ -9,8 +9,6 @@ from pathlib import Path
 if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from pydantic import BaseModel, Field, field_validator
-
 from src.agents import route_query
 from src.config import DOMAIN_DIRS, ROOT_DIR
 from src.graph import build_graph, initial_state
@@ -18,23 +16,8 @@ from src.langfuse_setup import flush, graph_config
 from src.rag import count_chunks
 
 
-class UserQuery(BaseModel):
-    """Valida y normaliza la consulta entrante antes de procesarla."""
-
-    text: str = Field(min_length=1, max_length=1000)
-
-    @field_validator("text")
-    @classmethod
-    def not_blank(cls, value: str) -> str:
-        cleaned = value.strip()
-        if not cleaned:
-            raise ValueError("La consulta no puede estar vacía.")
-        return cleaned
-
-
 def run_query(query: str) -> dict:
     """Ejecuta una consulta por el grafo (con tracing si hay credenciales)."""
-    query = UserQuery(text=query).text
     graph = build_graph()
     config = graph_config()
     state = initial_state(query)

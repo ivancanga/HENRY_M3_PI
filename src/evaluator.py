@@ -9,15 +9,12 @@ from src.langfuse_setup import score_current_trace
 
 
 class Evaluation(BaseModel):
-    """Score estructurado de calidad del RAG (escala 1-10).
+    """Score estructurado de la calidad de una respuesta (escala 1-10)."""
 
-    Las tres dimensiones replican métricas estándar (Ragas/TruLens) que pueden
-    calcularse sin respuesta de referencia.
-    """
-
-    faithfulness: int = Field(ge=1, le=10, description="Fidelidad de la respuesta al contexto (sin inventar).")
-    answer_relevance: int = Field(ge=1, le=10, description="Qué tanto la respuesta aborda la pregunta.")
-    context_relevance: int = Field(ge=1, le=10, description="Pertinencia del contexto recuperado (calidad del retriever).")
+    relevance: int = Field(ge=1, le=10, description="Qué tanto responde a la pregunta.")
+    completeness: int = Field(ge=1, le=10, description="Qué tan completa es.")
+    accuracy: int = Field(ge=1, le=10, description="Qué tan soportada está por el contexto.")
+    clarity: int = Field(ge=1, le=10, description="Qué tan clara y entendible es.")
     overall: float = Field(ge=1, le=10, description="Score general.")
     feedback: str = Field(description="Comentario cualitativo breve.")
 
@@ -33,12 +30,9 @@ def evaluate(state: dict[str, Any]) -> Evaluation:
         [
             (
                 "system",
-                "Evaluá la calidad de un sistema RAG de 1 a 10 en tres dimensiones estándar: "
-                "faithfulness (la respuesta se apoya únicamente en el contexto; si inventa o usa "
-                "conocimiento externo, bajá el score), answer_relevance (la respuesta aborda "
-                "directamente la pregunta) y context_relevance (los fragmentos recuperados son "
-                "pertinentes a la pregunta). Devolvé también un overall y un feedback breve. "
-                "Salida estructurada.",
+                "Evaluá la respuesta de un sistema RAG de 1 a 10 en relevance, completeness, "
+                "accuracy, clarity y overall. Si la respuesta inventa información que no está "
+                "en el contexto, bajá accuracy. Devolvé salida estructurada.",
             ),
             (
                 "human",
@@ -59,9 +53,10 @@ def evaluator_node(state: dict[str, Any]) -> dict[str, Any]:
     evaluation = evaluate(state)
     score_current_trace(
         {
-            "faithfulness": float(evaluation.faithfulness),
-            "answer_relevance": float(evaluation.answer_relevance),
-            "context_relevance": float(evaluation.context_relevance),
+            "relevance": float(evaluation.relevance),
+            "completeness": float(evaluation.completeness),
+            "accuracy": float(evaluation.accuracy),
+            "clarity": float(evaluation.clarity),
             "overall": float(evaluation.overall),
         },
         evaluation.feedback,
