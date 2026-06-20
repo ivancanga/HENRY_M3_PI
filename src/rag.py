@@ -4,7 +4,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
-from src.config import CHROMA_DIR, DOMAIN_DIRS, get_settings
+from src.config import DOMAIN_DIRS, get_settings
 
 
 def load_documents(folder: Path) -> list:
@@ -60,26 +60,19 @@ def build_embeddings():
 
 @lru_cache(maxsize=3)
 def get_retriever(domain: str):
-    """Crea o reusa la colección Chroma de un dominio y la devuelve como retriever."""
-    from langchain_chroma import Chroma
+    """Crea o reusa la colección del dominio (vía VectorStore) y la devuelve como retriever."""
+    from src.vectorstore import VectorStore
 
     settings = get_settings()
-    folder = DOMAIN_DIRS[domain]
-    embeddings = build_embeddings()
+    store = VectorStore(domain, build_embeddings())
 
-    vectorstore = Chroma(
-        collection_name=f"{domain}_docs",
-        embedding_function=embeddings,
-        persist_directory=str(CHROMA_DIR),
-    )
-
-    if vectorstore._collection.count() == 0:
-        chunks = split_documents(load_documents(folder))
+    if store.is_empty():
+        chunks = split_documents(load_documents(DOMAIN_DIRS[domain]))
         if len(chunks) < 50:
             raise ValueError(f"{domain} tiene {len(chunks)} chunks; mínimo esperado: 50")
-        vectorstore.add_documents(chunks)
+        store.add(chunks)
 
-    return vectorstore.as_retriever(search_kwargs={"k": settings.retriever_k})
+    return store.as_retriever(settings.retriever_k)
 
 
 def retrieve_context(domain: str, query: str) -> tuple[str, list[dict[str, Any]]]:
