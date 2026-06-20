@@ -56,6 +56,32 @@ flowchart LR
     class LF obs;
 ```
 
+### Cómo viaja una consulta
+
+1. El usuario envía una consulta (CLI: `--query` o modo interactivo).
+2. El **orquestador** la clasifica con el LLM (salida estructurada) en `hr`, `tech`,
+   `finance` o `unknown`.
+3. **LangGraph** enruta condicionalmente al nodo correspondiente.
+4. El **agente especialista** convierte la consulta en un vector y recupera de
+   **Chroma** los chunks más relevantes de su dominio (k=4).
+5. El **LLM** redacta la respuesta usando exclusivamente ese contexto (grounding).
+6. El **evaluator** (LLM-as-judge) puntúa la respuesta.
+7. **Langfuse** traza todo el recorrido y registra los scores.
+
+> Las consultas `unknown` cortan antes: responden sin RAG ni evaluación.
+
+## Stack tecnológico
+
+| Capa | Tecnología |
+|---|---|
+| Lenguaje / entorno | Python 3.12 · uv |
+| Orquestación multi-agente | LangGraph |
+| Framework LLM | LangChain |
+| LLM y embeddings | OpenAI (`gpt-4o-mini` · `text-embedding-3-small`) |
+| Vector store | Chroma |
+| Observabilidad | Langfuse |
+| Validación / datos estructurados | Pydantic |
+
 ## Estructura del proyecto
 
 ```
@@ -136,6 +162,18 @@ uv run python -m src.main
 
 > La primera consulta construye las colecciones Chroma (hace embeddings de los
 > documentos) y las persiste en `chroma_db/`. Las siguientes corridas las reusan.
+
+## Validación
+
+El comando `--validate` comprueba el proyecto sin construir la base Chroma:
+
+- **Chunks por dominio** (mínimo 50): HR 86 · Tech 91 · Finanzas 90.
+- **Ruteo**: 12/12 consultas de `test_queries.json` clasificadas correctamente
+  (cubre `hr`, `tech`, `finance` y casos `unknown`/ambiguos).
+
+```bash
+uv run python -m src.main --validate
+```
 
 ## Ejemplos de uso
 
@@ -235,12 +273,27 @@ Dos capas integradas en el flujo (no son pasos opcionales):
   (embeddings), no por coincidencia exacta de palabras. Elegí Chroma sobre FAISS
   porque persiste en disco y maneja una colección por dominio sin código extra; a
   esta escala el rendimiento es equivalente, así que prioricé la simplicidad.
+- **Modularidad del vector store.** La lógica del vector store está encapsulada en
+  una clase (`VectorStore`) con una interfaz mínima; cambiar de proveedor (FAISS,
+  Qdrant, etc.) implica reescribir un solo archivo, sin tocar los agentes ni el grafo.
 - **Control de calidad automático (LLM-as-judge).** Un segundo modelo evalúa cada
   respuesta antes de que llegue al cliente y detecta cuándo el agente se desvía
   del contexto. Convierte la calidad en algo medible, no en una impresión.
 - **Observabilidad de extremo a extremo.** Todo el recorrido de cada consulta
   queda trazado en Langfuse, lo que permite depurar una mala clasificación o un
   retrieval fallido inspeccionando el flujo completo, en lugar de adivinar.
+
+## Extender el sistema
+
+Agregar un dominio nuevo (por ejemplo, Legal) es un cambio local:
+
+1. Crear `data/legal_docs/` con sus documentos (≥50 chunks).
+2. Sumar `"legal"` al mapa `DOMAIN_DIRS` en `src/config.py`.
+3. Agregar el intent `legal`, su nodo en `src/agents.py` y registrarlo en el grafo
+   (`src/graph.py`) con su arista condicional.
+
+La arquitectura de grafo y la abstracción del vector store mantienen el cambio
+aislado: no hay que tocar la lógica de los demás agentes.
 
 ## Notas de configuración
 
